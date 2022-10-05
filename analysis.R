@@ -1,5 +1,13 @@
 library('ggpubr')
 
+#
+
+muertesCancer %>% group_by(cod_icd10) %>%
+  summarize(total = n()) %>%
+  ggplot(aes(cod_icd10, total)) +
+  geom_bar(stat="identity")
+
+
 # Graph of toxic release per year
 data %>% group_by(YEAR) %>%
   mutate(total = sum(ON.SITE_RELEASE_TOTAL)) %>%
@@ -227,9 +235,12 @@ analysisData %>% filter(COUNTY == "GUAYAMA") %>%
                      sec.axis = sec_axis(~./1000, name = "Total Deaths per year")) +
   theme(axis.title.y = element_text(color = "blue"), axis.title.y.right = element_text(color = "red"))
 
+# Map Spacial Statistics
+cn <- spat_data("pt_countries")
+
+plot(cn, xlim=c(-67.5, -65.5), ylim=c(17.5,19), axes=TRUE)
+points(data$Lon, data$Lat, cex=.5, col='blue')
+points(muertesCancer$lon, muertesCancer$lat, cex=.5, col='red')
 
 
-# cn <- spat_data("pt_countries")
-
-# plot(cn, xlim=c(-67.5, -65.5), ylim=c(17.5,19), axes=TRUE)
 

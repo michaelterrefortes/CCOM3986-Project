@@ -89,7 +89,6 @@ pueblos <- c("4" = "ADJUNTAS",
             "324" = "YAUCO",
             "346" = "EN PUERTO RICO")
 
-
 # Save toxic release data
 data = toxics_release_inventory_data %>% filter(CARCINOGEN == "YES")
 
@@ -138,3 +137,77 @@ muertesCancer = muertesCancer %>% group_by(placeresidence) %>% mutate(pueblo = p
 
 # Add monthly deaths date
 muertesCancer$date <- as.Date(with(muertesCancer, paste(yeardeath, monthdeath, 1, sep="-")),"%Y-%m-%d")
+
+
+# All this chunk of code is used to separate the Latitude column into
+# Lat and Lon columns in order to plot in map on the analysis file
+data = data[, c("Location.1", names(data)[names(data)!="Location.1"])]
+
+dat = strsplit(data$Location.1, split = ",")
+data2 = as.data.frame(data$Location.1)
+names(data2)[1] = "Location.1"
+
+j = 1
+for (i in dat){
+  data2$Lat[j] = i[1]
+  data2$Lon[j] = i[2]
+  j = j + 1
+}
+
+data2 = na.omit(data2)
+y = 1
+for (k in data2$Lat){
+  if(strsplit(k, "")[[1]][1] == "("){
+     data2$Lat[y] = strsplit(k, "\\(")[[1]][2]
+  }
+  y = y + 1
+  
+}
+
+y = 1
+for (k in data2$Lon){
+  v = strsplit(k, "")[[1]]
+  if(tail(v,n=1) == ")"){
+    data2$Lon[y] = (strsplit(k, "\\)")[[1]])
+  }
+  y = y+1
+}
+
+rm(i, j, k, v, y, dat)
+
+data = full_join(data, data2)
+
+data = data[, c("Lon", names(data)[names(data)!="Lon"])]
+data = data[, c("Lat", names(data)[names(data)!="Lat"])]
+rm(data2)
+
+
+# Adding Lat and Lng to deaths by town
+PRcities = uscities %>% filter(state_id == "PR")
+
+PRcities = PRcities %>% distinct(county_name, .keep_all= TRUE)
+
+PRcities$county_name = toupper(PRcities$county_name)
+
+PRcities$county_name[PRcities$county_name=="AÑASCO"] = "ANASCO"
+PRcities$county_name[PRcities$county_name=="BAYAMÓN"] = "BAYAMON"
+PRcities$county_name[PRcities$county_name=="CANÓVANAS"] = "CANOVANAS"
+PRcities$county_name[PRcities$county_name=="CATAÑO"] = "CATANO"
+PRcities$county_name[PRcities$county_name=="COMERÍO"] = "COMERIO"
+PRcities$county_name[PRcities$county_name=="GUÁNICA"] = "GUANICA"
+PRcities$county_name[PRcities$county_name=="JUANA DÍAZ"] = "JUANA DIAZ"
+PRcities$county_name[PRcities$county_name=="LOÍZA"] = "LOIZA"
+PRcities$county_name[PRcities$county_name=="MANATÍ"] = "MANATI"
+PRcities$county_name[PRcities$county_name=="MAYAGÜEZ"] = "MAYAGUEZ"
+PRcities$county_name[PRcities$county_name=="PEÑUELAS"] = "PENUELAS"
+PRcities$county_name[PRcities$county_name=="RINCÓN"] = "RINCON"
+PRcities$county_name[PRcities$county_name=="RÍO GRANDE"] = "RIO GRANDE"
+PRcities$county_name[PRcities$county_name=="SAN GERMÁN"] = "SAN GERMAN"
+PRcities$county_name[PRcities$county_name=="SAN SEBASTIÁN"] = "SAN SEBASTIAN"
+
+PRcities = data.frame(pueblo = PRcities$county_name, lat = PRcities$lat, lon = PRcities$lng)
+
+muertesCancer = full_join(muertesCancer, PRcities)
+
+
+
