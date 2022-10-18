@@ -119,7 +119,8 @@ data2$COUNTY = data$COUNTY
 j = 1
 for(x in dat) {
   for(i in x){
-    data2$COUNTY[j] = i
+    #data2$COUNTY[j] = i
+    print(i)
     j = j + 1
   }
 }
