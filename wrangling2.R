@@ -1,5 +1,5 @@
 
-newDeaths2007_2014 = X2007_2014 %>% filter(conicd == "C")
+newDeaths2007_2014 = X2007_2014 %>% filter(conicd == "C" & ctryres %like% "Puerto Rico")
 
 newDeaths2015_2020 = X2015_2020 %>% filter(`DeathCause_I (ID)` %like% "^C" & ResidencePlace %like% "PUERTO RICO")
 
